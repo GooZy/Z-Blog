@@ -2,9 +2,6 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2017/11/11 11:13
 # @Author  : Guo Ziyao
-import os
-import sqlite3
-
 from flask import abort
 from flask import flash
 from flask import Flask
