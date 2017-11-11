@@ -1,0 +1,3 @@
+graft z_blog/templates
+graft z_blog/static
+include z_blog/schema.sql
