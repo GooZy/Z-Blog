@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>学习Cytoscape.js和neo4j</title>
+    <link href="/static/css/style.css" rel="stylesheet" />
+    <script src="/static/js/jquery-1.11.2.min.js"></script>
+    <script src="/static/js/cytoscape.min.js"></script>
+</head>
+<body>
+  <h1>Invest网络图</h1>
+  <div style="visibility: hidden" id="variable">{{ company_name }}</div>
+  <div id="cy"></div>
+  <script>
+      a = document.getElementById('variable').textContent;
+      $(function(){
+      $.get('/visual_data', {company_name: a}, function(result) {
+        var style = [
+          { selector: 'node[label = "Company"]', css: {'background-color': '#6FB1FC'}},
+          { selector: 'node[label = "Person"]', css: {'background-color': '#F5A45D'}}
+        ];
+
+        var cy = cytoscape({
+          container: document.getElementById('cy'),
+          style: style,
+          layout: { name: 'cose', fit: false },
+          elements: result.elements
+        });
+      }, 'json');
+    });
+  </script>
+</body>
+</html>

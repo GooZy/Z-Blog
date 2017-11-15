@@ -5,6 +5,7 @@
 from flask import abort
 from flask import flash
 from flask import Flask
+from flask import jsonify
 from flask import redirect
 from flask import render_template
 from flask import request
@@ -64,3 +65,55 @@ def logout():
     session.pop('logged_in', None)
     flash('You were logged out')
     return redirect(url_for('show_entries'))
+
+# 可视化相关
+from py2neo import Graph, Node, Relationship
+graph = Graph(
+    "http://localhost:7474",
+    username="neo4j",
+    password="000000"
+)
+
+
+def buildNodes(nodeRecord):
+    data = {"name": nodeRecord['name'], "label": next(iter(nodeRecord.labels()))}
+    return {"data": data}
+
+
+def buildEdges(relationRecord):
+    data = {"source": relationRecord.start_node()['name'],
+            "target": relationRecord.end_node()['name'],
+            "relationship": relationRecord.type()}
+    return {"data": data}
+
+
+def query_name(company_name):
+    query = u"""
+    match p = (a)-[]-()-[]-()
+    where a.name = '{name}' 
+    return p
+    """
+    # print query.format(**{'name': company_name})
+    return graph.data(query.format(**{'name': company_name}))
+
+
+@app.route('/visual_data', methods=['GET'])
+def visual():
+    company_name = request.args.get('company_name')
+    results = query_name(company_name)
+    nli = []
+    rli = []
+    for each in results:
+        for each_b in each['p'].nodes():
+            nli.append(each_b)
+        for each_b in each['p'].relationships():
+            rli.append(each_b)
+    nodes = map(buildNodes, nli)
+    edges = map(buildEdges, rli)
+
+    return jsonify(elements={"nodes": nodes, "edges": edges})
+
+@app.route('/graph', methods=['GET'])
+def data_view():
+    company_name = request.args.get('company_name')
+    return render_template('graph.html', company_name=company_name)
